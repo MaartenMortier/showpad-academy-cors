@@ -15,8 +15,8 @@ Then go to `http://start.academy.dev:8000/f/`  to open up the experiments portal
 
 ## Background
 
-Material for the CORS class. See [presentation](cors.pdf).
+See [presentation](cors.pdf).
 
 ## Read More
 
-https://www.w3.org/TR/cors/#simple-header
+https://www.w3.org/TR/cors
