@@ -88,7 +88,6 @@ func bad(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	//http.HandleFunc("/", handle)
 	http.HandleFunc("/", handle)
 
 	fs := http.FileServer(http.Dir("."))
