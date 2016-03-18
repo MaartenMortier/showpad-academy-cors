@@ -1,0 +1,162 @@
+<html>
+
+<head>
+  <style>
+    body {
+      font-family: sans-serif;
+      font-size: 18pt;
+    }
+
+    .good {
+      background-color: #ddffdd;
+    }
+
+    .bad {
+      background-color: #ffdddd;
+    }
+
+    .active {
+      border: 1px solid black;
+      padding: 8px;
+      background-color: #ffffaa;
+      line-height: 3em;
+    }
+
+    a,
+    a:visited {
+      color: blue;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="float:left">
+    <ul>
+      <li/><a href="http://bad.academy.dev:8000">
+        Bad</a>
+      <li/><a href="http://bad.academy.dev:8000" data="custom">
+        Bad, With Custom Header</a>
+      <li/><a href="http://good.academy.dev:8000">
+        Good Specific Origin</a>
+      <li/><a href="http://good.academy.dev:8000" data="custom">
+        Good Specific Origin, With Custom Header</a>
+      <li/><a href="http://wildcard.academy.dev:8000">
+        Good Wildcard</a>
+      <li/><a href="http://wildcard.academy.dev:8000" data="custom">
+        Good Wildcard, With Custom Header</a>
+      <li/><a href="http://wildcard.academy.dev:8000/cookie">
+        Good Wildcard (Set Cookie)</a>
+      <li/><a href="http://wildcard.academy.dev:8000" data="creds">
+        Good Wildcard (Send Cookie)</a>
+      <li/><a href="http://good.academy.dev:8000/cookie">
+        Good Specific Origin (Set Cookie)</a>
+      <li/><a href="http://good.academy.dev:8000" data="creds">
+        Good Specific Origin (Send Cookie)</a>
+      <li/><a href="http://redirect.academy.dev:8000/good">
+        Redirect to Good</a>
+        <li/><a href="http://redirect.academy.dev:8000/good" data="custom">
+          Redirect to Good, With Custom Header</a>
+      <li/><a href="http://redirect.academy.dev:8000/good/cookie">
+        Redirect to Good (Set-Cookie)</a>
+      <li/><a href="http://redirect.academy.dev:8000/good/cookie">
+        Redirect to Good (Send-Cookie)</a>
+      <li/><a href="http://redirect.academy.dev:8000/wildcard">
+        Redirect to Wildcard</a>
+      <li/><a href="http://redirect.academy.dev:8000/wildcard" data="custom">
+          Redirect to Wildcard, With Custom Header</a>
+      <li/><a href="http://redirect.academy.dev:8000/wildcard/cookie">
+        Redirect to Wildcard (Set-Cookie)</a>
+      <li/><a href="http://redirect.academy.dev:8000/bad">
+        Redirect to Bad</a>
+      <li/><a href="http://redirect.academy.dev:8000/bad/cookie">
+        Redirect to Bad (Set-Cookie)</a>
+    </ul>
+  </div>
+  <div style="float:right" id="result">
+  </div>
+
+  <script>
+    // Create the XHR object.
+    function createCORSRequest(method, url, customHeader, withCredentials) {
+      var xhr = new XMLHttpRequest();
+      if ("withCredentials" in xhr) {
+        // XHR for Chrome/Firefox/Opera/Safari.
+        if (withCredentials) {
+          xhr.withCredentials = true;
+        }
+
+        xhr.open(method, url, true);
+
+      } else if (typeof XDomainRequest != "undefined") {
+        // XDomainRequest for IE.
+        xhr = new XDomainRequest();
+        xhr.open(method, url);
+      } else {
+        // CORS not supported.
+        return null;
+      }
+
+      if (customHeader) {
+        xhr.setRequestHeader("Authorization", "header");
+      }
+
+      return xhr;
+    }
+
+    // Make the actual CORS request.
+    function makeCorsRequest(url, success, failure, customHeader, withCredentials) {
+      // All HTML5 Rocks properties support CORS.
+      var xhr = createCORSRequest('GET', url, customHeader, withCredentials);
+      if (!xhr) {
+        alert('CORS not supported');
+        return;
+      }
+
+      // Response handlers.
+      xhr.onload = function() {
+        var text = xhr.responseText;
+        success(text);
+      };
+
+      xhr.onerror = function() {
+        failure()
+      };
+
+      xhr.send();
+    }
+
+    var anchors = document.getElementsByTagName("a");
+    var result = document.getElementById("result");
+
+    for (var i = 0; i < anchors.length; i++) {
+      var elem = anchors[i];
+      elem.onclick = function(e) {
+        for (var i = 0; i < anchors.length; i++) {
+          anchors[i].className = "";
+        }
+        e.target.className = "active";
+        var data = e.target.getAttribute("data");
+
+        result.innerHTML = "";
+        result.className = "";
+        makeCorsRequest(
+          e.target.href,
+          function(response) {
+            result.innerHTML = response;
+            result.className = "good";
+          },
+          function(e) {
+            result.innerHTML = e ? e : "CORS PROBLEM";
+            result.className = "bad";
+          },
+          data ? data.search("custom") != -1 : false,
+          data ? data.search("creds") != -1 : false
+        );
+        return false;
+      };
+    }
+  </script>
+
+</body>
+
+</html>
